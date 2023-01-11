@@ -12,31 +12,32 @@ class ViewController: UITableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        //let urlString = "https://api.whitehouse.gov/v1/petitions.json?limit=100"
-        let urlString = "https://www.hackingwithswift.com/samples/petitions-1.json"
+        
+        let urlString: String
+        if navigationController?.tabBarItem.tag == 0 {
+            urlString = "https://www.hackingwithswift.com/samples/petitions-1.json"
+        }
+        else{
+            urlString = "https://www.hackingwithswift.com/samples/petitions-2.json"
+        }
         
         if let url = URL(string: urlString){
             if let data =  try? Data(contentsOf: url){
                 print("hello")
                 parse(data)
+                return
             }
-            else{print("voala")}
         }
-        else{print("voala2")}
+            showError()
     }
     
     func parse(_ json: Data){
         let decoder = JSONDecoder()
-        print("halo")
         
         if let jsonPetitions = try? decoder.decode(Petitions.self, from: json) {
                 petitions = jsonPetitions.results
                 tableView.reloadData()
             }
-        else{print("runn")}
-        
-        
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -56,6 +57,12 @@ class ViewController: UITableViewController {
         vc.detailItem = petitions[indexPath.row]
         
         navigationController?.pushViewController(vc, animated: true)
+    }
+    
+    func showError(){
+        let ac = UIAlertController(title: "Error", message: "There was an error showing the feed; Please check your internet then try again", preferredStyle: .alert)
+        ac.addAction(UIAlertAction(title: "Ok", style: .default))
+        present(ac, animated: true)
     }
 }
 
