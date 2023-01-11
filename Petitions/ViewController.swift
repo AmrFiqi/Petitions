@@ -19,14 +19,14 @@ class ViewController: UITableViewController {
         if let url = URL(string: urlString){
             if let data =  try? Data(contentsOf: url){
                 print("hello")
-                parse(json: data)
+                parse(data)
             }
             else{print("voala")}
         }
         else{print("voala2")}
     }
     
-    func parse(json: Data){
+    func parse(_ json: Data){
         let decoder = JSONDecoder()
         print("halo")
         
@@ -51,6 +51,11 @@ class ViewController: UITableViewController {
         return cell
     }
 
-
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let vc = DetailViewController()
+        vc.detailItem = petitions[indexPath.row]
+        
+        navigationController?.pushViewController(vc, animated: true)
+    }
 }
 
