@@ -55,7 +55,6 @@ class ViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
-        print (filtered.count)
         let filter = filtered[indexPath.row]
         cell.textLabel?.text = filter.title
         cell.detailTextLabel?.text = filter.body
@@ -105,14 +104,11 @@ class ViewController: UITableViewController {
             let ac = UIAlertController(title: "Error, Not found", message: nil, preferredStyle: .alert)
             ac.addAction(UIAlertAction(title: "Ok", style: .default))
             present(ac,animated: true)
-            print(filtered.count)
         }
         else{
             filtered = petitions.filter({ petition in
                             petition.body.contains(answer) || petition.title.contains(answer)
                         })
-            print(filtered.count)
-            print("********************")
             }
         self.tableView.reloadData()
         }
