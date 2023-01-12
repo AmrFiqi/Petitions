@@ -9,15 +9,16 @@ import UIKit
 
 class ViewController: UITableViewController {
     var petitions = [Petition]()
+    var filtered = [Petition]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         title = "Petitions"
         
         // Create credits button
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Credit", style: .plain, target: self, action: #selector(credits))
         
+        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .search, target: self, action: #selector(filteredSearch))
         // Select the json to show based on bar button item
         let urlString: String
         if navigationController?.tabBarItem.tag == 0 {
@@ -34,35 +35,37 @@ class ViewController: UITableViewController {
                 return
             }
         }
-            showError()
+        showError()
     }
+    
     // decode the json and make it readable
     func parse(_ json: Data){
         let decoder = JSONDecoder()
         
         if let jsonPetitions = try? decoder.decode(Petitions.self, from: json) {
-                petitions = jsonPetitions.results
-                tableView.reloadData()
-            }
+            petitions = jsonPetitions.results
+            filtered = petitions
+            tableView.reloadData()
+        }
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return petitions.count
+        return filtered.count
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
-        let petition = petitions[indexPath.row]
-        cell.textLabel?.text = petition.title
-        cell.detailTextLabel?.text = petition.body
+        print (filtered.count)
+        let filter = filtered[indexPath.row]
+        cell.textLabel?.text = filter.title
+        cell.detailTextLabel?.text = filter.body
         return cell
     }
-
+    
     // Show our detailViewController when selecting a cell
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let vc = DetailViewController()
-        vc.detailItem = petitions[indexPath.row]
-        
+        vc.detailItem = filtered[indexPath.row]
         navigationController?.pushViewController(vc, animated: true)
     }
     
@@ -79,5 +82,40 @@ class ViewController: UITableViewController {
         ac.addAction(UIAlertAction(title: "Ok", style: .default))
         present(ac, animated: true)
     }
+    
+    // Enter search words
+    @objc func filteredSearch(){
+        let ac = UIAlertController(title: "Search", message: nil, preferredStyle: .alert)
+        ac.addTextField()
+        
+        let searchWord = UIAlertAction(title: "Submit", style: .default){
+            [weak self, weak ac] _ in
+            guard let answer = ac?.textFields?[0].text else {return}
+            self?.submit(answer)
+        }
+        ac.addAction(searchWord)
+        present(ac, animated: true)
+    }
+    
+    // Submit search word
+    func submit(_ answer: String){
+        
+        if answer  == "" {
+            filtered = petitions
+            let ac = UIAlertController(title: "Error, Not found", message: nil, preferredStyle: .alert)
+            ac.addAction(UIAlertAction(title: "Ok", style: .default))
+            present(ac,animated: true)
+            print(filtered.count)
+        }
+        else{
+            filtered = petitions.filter({ petition in
+                            petition.body.contains(answer) || petition.title.contains(answer)
+                        })
+            print(filtered.count)
+            print("********************")
+            }
+        self.tableView.reloadData()
+        }
+       
 }
 
