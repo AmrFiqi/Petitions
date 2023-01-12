@@ -21,7 +21,8 @@ class DetailViewController: UIViewController {
         super.viewDidLoad()
 
         guard let detailItem = detailItem else{return}
-        
+        let petition = detailItem.title
+        title = petition.components(separatedBy: " ").first
         let html =
 """
 <html>
@@ -30,6 +31,7 @@ class DetailViewController: UIViewController {
 <style> body { font-size: 150%; } </style>
 </head>
 <body>
+<h4>\(petition)</h4>
 \(detailItem.body)
 </body>
 </html>
