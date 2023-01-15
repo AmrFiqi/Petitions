@@ -28,14 +28,17 @@ class ViewController: UITableViewController {
             urlString = "https://www.hackingwithswift.com/samples/petitions-2.json"
         }
         
-        // Get the data from the url and parse it
-        if let url = URL(string: urlString){
-            if let data =  try? Data(contentsOf: url){
-                parse(data)
-                return
+        DispatchQueue.global(qos: .userInitiated).async {
+            // Get the data from the url and parse it
+            [weak self] in
+            if let url = URL(string: urlString){
+                if let data =  try? Data(contentsOf: url){
+                    self?.parse(data)
+                    return
+                }
             }
+            self?.showError()
         }
-        showError()
     }
     
     // decode the json and make it readable
@@ -45,7 +48,12 @@ class ViewController: UITableViewController {
         if let jsonPetitions = try? decoder.decode(Petitions.self, from: json) {
             petitions = jsonPetitions.results
             filtered = petitions
-            tableView.reloadData()
+            
+            DispatchQueue.main.async {
+                [weak self] in
+                self?.tableView.reloadData()
+            }
+            
         }
     }
     
@@ -70,9 +78,13 @@ class ViewController: UITableViewController {
     
     // Show error when unable to load data
     func showError(){
-        let ac = UIAlertController(title: "Error", message: "There was an error showing the feed; Please check your internet then try again", preferredStyle: .alert)
-        ac.addAction(UIAlertAction(title: "Ok", style: .default))
-        present(ac, animated: true)
+        DispatchQueue.main.async {
+            [weak self] in
+            let ac = UIAlertController(title: "Error", message: "There was an error showing the feed; Please check your internet then try again", preferredStyle: .alert)
+            ac.addAction(UIAlertAction(title: "Ok", style: .default))
+            self?.present(ac, animated: true)
+        }
+        
     }
     
     // Credits
