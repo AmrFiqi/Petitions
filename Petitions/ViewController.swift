@@ -110,20 +110,30 @@ class ViewController: UITableViewController {
     
     // Submit search word
     func submit(_ answer: String){
-        
-        if answer  == "" {
-            filtered = petitions
-            let ac = UIAlertController(title: "Error, Not found", message: nil, preferredStyle: .alert)
-            ac.addAction(UIAlertAction(title: "Ok", style: .default))
-            present(ac,animated: true)
-        }
-        else{
-            filtered = petitions.filter({ petition in
-                            petition.body.contains(answer) || petition.title.contains(answer)
-                        })
+        DispatchQueue.global(qos: .userInitiated).async {
+            [weak self] in
+            if answer  == "" {
+                self?.filtered = self!.petitions
+                DispatchQueue.main.async {
+                    let ac = UIAlertController(title: "Error, Not found", message: nil, preferredStyle: .alert)
+                    ac.addAction(UIAlertAction(title: "Ok", style: .default))
+                    self?.present(ac,animated: true)
+                }
+                
             }
-        self.tableView.reloadData()
+            else{
+                self?.filtered = self!.petitions.filter({ petition in
+                    petition.body.contains(answer) || petition.title.contains(answer)
+                })
+            }
+            DispatchQueue.main.async {
+                [weak self] in
+                self?.tableView.reloadData()
+                
+            }
+            
         }
-       
+        
+    }
 }
 
